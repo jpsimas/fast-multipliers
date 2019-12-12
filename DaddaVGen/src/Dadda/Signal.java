@@ -1,3 +1,4 @@
+// Copyright (C) 2019 João Pedro de Omena Simas
 // Copyright (C) 2017 Henrique Ogawa, Lucas Gaia
 //
 // This program is free software: you can redistribute it and/or modify
@@ -30,16 +31,16 @@ public class Signal {
     public String toString(){
         String Str = "";
         if (type.equals("P")) {
-            Str = "P" + "[" + y_i + "]" + "[" + x_i + "]";
+            Str = "P" + "(" + y_i + ")" + "(" + x_i + ")";
         }
         if (type.equals("S")) {
-            Str = "S" + "[" + x_i + "]";
+            Str = "S" + "(" + x_i + ")";
         }
         if (type.equals("Cout")) {
-            Str = "Cout" + "[" + x_i + "]";
+            Str = "Cout" + "(" + x_i + ")";
         }
         if (type.equals("Cin")) {
-            Str = "Cin" + "[" + x_i + "]";
+            Str = "Cin" + "(" + x_i + ")";
         }
         return Str;
     }

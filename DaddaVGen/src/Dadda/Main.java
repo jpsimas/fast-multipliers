@@ -1,3 +1,4 @@
+// Copyright (C) 2019 João Pedro de Omena Simas
 // Copyright (C) 2017 Henrique Ogawa, Lucas Gaia
 //
 // This program is free software: you can redistribute it and/or modify
@@ -154,54 +155,67 @@ public class Main {
     private static void genVerilog(int N_bits){
         String filename = "Mult_Dadda" + N_bits;
         try {
-            File file = new File("verilog/" + filename + ".v");
+            File file = new File("vhdl/" + filename + ".vhd");
             file.getParentFile().mkdirs();
             BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 
-            writer.write("`timescale 1ns / 1ps");
+            // writer.write("`timescale 1ns / 1ps");
 
-            writer.write("\n\nmodule Mult_Dadda" + N_bits + " # (");
-            writer.write("\n\tparameter N = " + N_bits);
-            writer.write("\n)(");
-            writer.write("\n\tinput [N-1:0] x,");
-            writer.write("\n\tinput [N-1:0] y,");
-            writer.write("\n\toutput [2*N-1:0] z");
-            writer.write("\n);");
+	    writer.write("library ieee;");
+	    writer.write("\nuse ieee.std_logic_1164.all;");
+	    
+            writer.write("\n\nentity Mult_Dadda" + N_bits + " is");
+	    writer.write("\ngeneric(N : natural := " + N_bits + ");");
 
-            writer.write("\n\nwire [N-1:0] P[N-1:0];\n\n");
+	    writer.write("\nport(x : in std_logic_vector(N - 1 downto 0);");
+	    writer.write("\ny: in std_logic_vector(N - 1 downto 0);");
+	    writer.write("\nz : out std_logic_vector(2*N - 1 downto 0));");
+
+	    writer.write("\nend entity Mult_Dadda" + N_bits + ";");
+
+	    writer.write("\narchitecture arch of Mult_Dadda" + N_bits + " is");
+
+	    writer.write("\ncomponent full_adder is\nport(\na : in std_logic;\nb : in std_logic;\ncin : in  std_logic;\ns : out std_logic;\ncout : out std_logic);\nend component;");
+
+	    writer.write("\ncomponent half_adder is\nport(\na : in std_logic;\nb : in std_logic;\ns : out std_logic;\ncout : out std_logic);\nend component;\n");
+	    
+	    writer.write("\n\ntype p_t is array (N-1 downto 0) of std_logic_vector(N - 1 downto 0);");
+	    writer.write("\nsignal p : p_t;");
+	    writer.write("\n subtype s_t is std_logic_vector(" + n_adder + " downto 0);");
+	    writer.write("\nsignal S : s_t;");
+	    writer.write("\nsubtype cout_t is std_logic_vector(" + n_adder + " downto 0);");
+	    writer.write("\nsignal Cout : cout_t;");
+	    writer.write("\nbegin");
             for (int i = 0; i < N_bits; i++) {
                 for (int j = 0; j < N_bits; j++) {
-                    writer.write("\nassign P[" + i + "][" + j + "] = x[" + i + "] & y[" + j + "];");
+		    writer.write("\nP(" + i + ")(" + j + ") <= x(" + i + ") and y(" + j + ");");
                 }
             }
-
-            writer.write("\n\nwire [" + n_adder + ":0] S;");
-            writer.write("\nwire [" +  n_adder + ":0] Cout;");
 
             int HAcnt = 1;
             int FAcnt = 1;
             for (Object adder: Adders) {
                 if (adder.getClass().toString().equals("class Dadda.HA")){
-                    writer.write("\nHalf_Adder " + "HA" + HAcnt + " " + adder.toString() + ";");
+                    writer.write("\nHA" + HAcnt + " : half_adder port map" + adder.toString() + ";");
                     HAcnt++;
                 }
                 else if (adder.getClass().toString().equals("class Dadda.FA")) {
-                    writer.write("\nFull_Adder " + "FA" + FAcnt + " " + adder.toString() + ";");
+                    writer.write("\nFA" + FAcnt + " : full_adder port map" + adder.toString() + ";");
                     FAcnt++;
                 }
             }
 
             // output assignments
-            writer.write("\n\nassign z[" + (2*N_bits-1) + "] = Cout[" + (n_adder-1) + "];");
+            writer.write("\n\nz(" + (2*N_bits-1) + ") <= Cout(" + (n_adder-1) + ");");
             int t = 1;
             for (int i = (2*N_bits-2); i > 1; i--) {
-                writer.write("\nassign z[" + i + "] = S[" + (n_adder-t) + "];");
+                writer.write("\nz(" + i + ") <= S(" + (n_adder-t) + ");");
                 t++;
             }
-            writer.write("\nassign z[1] = S[0];");
-            writer.write("\nassign z[0] = P[0][0];");
+            writer.write("\nz(1) <= S(0);");
+            writer.write("\nz(0) <= P(0)(0);");
 
-            writer.write("\n\nendmodule");
+            writer.write("\n\nend architecture;");
 
             writer.close();
         } catch (IOException e){
