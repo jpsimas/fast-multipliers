@@ -133,13 +133,13 @@ public class Main {
         // column 1 will be left with S[0], the output of a half adder
         Signal S = new Signal("S", NA, NA);
         Signal Cout = new Signal("Cout", NA, NA);
-    		HA half_adder = new HA(PP_tree.get(1).get(0), PP_tree.get(1).get(1), S, Cout);
-    		PP_tree.get(1).remove(0);
-    		PP_tree.get(1).remove(0);
-    		PP_tree.get(1).add(S);
-    		PP_tree.get(2).add(Cout);
-    		// @lgaia - debug
-    		//System.out.println("HA " + half_adder.toString() + ";");
+	HA half_adder = new HA(PP_tree.get(1).get(0), PP_tree.get(1).get(1), S, Cout);
+	PP_tree.get(1).remove(0);
+	PP_tree.get(1).remove(0);
+	PP_tree.get(1).add(S);
+	PP_tree.get(2).add(Cout);
+	// @lgaia - debug
+	//System.out.println("HA " + half_adder.toString() + ";");
         Adders.add(half_adder);
 
         for (int col = 2; col < PP_tree.size(); col ++){
@@ -179,18 +179,20 @@ public class Main {
 
 	    writer.write("\ncomponent half_adder is\nport(\na : in std_logic;\nb : in std_logic;\ns : out std_logic;\ncout : out std_logic);\nend component;\n");
 	    
-	    writer.write("\n\ntype p_t is array (N-1 downto 0) of std_logic_vector(N - 1 downto 0);");
+	    // writer.write("\n\ntype p_t is array (N-1 downto 0) of std_logic_vector(N - 1 downto 0);");
+	    writer.write("\n\ntype p_t is array (N/2-1 downto 0) of std_logic_vector(N downto 0);");
 	    writer.write("\nsignal p : p_t;");
-	    writer.write("\n subtype s_t is std_logic_vector(" + n_adder + " downto 0);");
+	    writer.write("\nsubtype s_t is std_logic_vector(" + n_adder + " downto 0);");
 	    writer.write("\nsignal S : s_t;");
 	    writer.write("\nsubtype cout_t is std_logic_vector(" + n_adder + " downto 0);");
 	    writer.write("\nsignal Cout : cout_t;");
 	    writer.write("\nbegin");
-            for (int i = 0; i < N_bits; i++) {
-                for (int j = 0; j < N_bits; j++) {
-		    writer.write("\nP(" + i + ")(" + j + ") <= x(" + i + ") and y(" + j + ");");
-                }
-            }
+            // for (int i = 0; i < N_bits; i++) {
+            //     for (int j = 0; j < N_bits; j++) {
+	    // 	    writer.write("\nP(" + i + ")(" + j + ") <= x(" + i + ") and y(" + j + ");");
+            //     }
+            // }
+	    writer.write("\nppg0: mbe_ppg port map(x(1 downto 0)&'0', y, P(0));\nfor i in 1 to n/2 generate\nppgi: mbe_ppg port map(x(2*i + 1 downto 2*i - 1), y, P(i));\nend generate;");
 
             int HAcnt = 1;
             int FAcnt = 1;
