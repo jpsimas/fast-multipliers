@@ -1,2 +1,2 @@
-# fast-multipliers
-Project repository of DaddaVGen and WallaceVGen frameworks for automated generation of Wallace and Dadda multipliers in Verilog HDL
+# fast-multipliers-vhdl
+fork of https://github.com/HSOgawa/fast-multipliers that generates vhdl code instead of verilog. see original rep for for info
