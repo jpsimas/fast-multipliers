@@ -23,11 +23,11 @@ public class Signal {
     private int y_i;
     public boolean is_valid;
 
-    public Signal(String type, int x_i, int y_i, int N_bits){
+    public Signal(String type, int x_i, int y_i){
         this.type = type;
         this.x_i = x_i;
         this.y_i = y_i;
-	if(y_i < N_bits/2)
+	if(y_i%2 == 0)
 	    is_valid = true;
 	else
 	    is_valid = false;

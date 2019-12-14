@@ -47,7 +47,7 @@ public class Main {
             ArrayList<Signal> column = new ArrayList<>();
             // j represents the counter in each column
 	    for (int j = 0; j <= i; j++) {
-		Signal P = new Signal("P", i - j, j, N_bits);
+		Signal P = new Signal("P", i - j, j);
 		    column.add(j, P);
             }
             columns.put(i, column);
@@ -57,7 +57,7 @@ public class Main {
             // j represents the counter in each column
             int cnt = 0;
             for (int j = i - N_bits + 1; j < N_bits; j++) {
-		Signal P = new Signal("P", i - j, j, N_bits);
+		Signal P = new Signal("P", i - j, j);
 		    column.add(cnt, P);
                 cnt++;
             }
@@ -77,9 +77,9 @@ public class Main {
 
     }
 
-    private static void addHalfAdder(int col, int N_bits){
-    	Signal S = new Signal("S", n_adder, NA, N_bits);
-        Signal Cout = new Signal("Cout", n_adder, NA, N_bits);
+    private static void addHalfAdder(int col){
+    	Signal S = new Signal("S", n_adder, NA);
+        Signal Cout = new Signal("Cout", n_adder, NA);
 	HA half_adder = new HA(PP_tree.get(col).get(0), PP_tree.get(col).get(1), S, Cout);
 	n_adder++;
 
@@ -93,9 +93,9 @@ public class Main {
 	    Adders.add(half_adder);
     }
 
-    private static void addFullAdder(int col, int N_bits){
-    	Signal S = new Signal("S", n_adder, NA, N_bits);
-        Signal Cout = new Signal("Cout", n_adder, NA, N_bits);
+    private static void addFullAdder(int col){
+    	Signal S = new Signal("S", n_adder, NA);
+        Signal Cout = new Signal("Cout", n_adder, NA);
 	FA full_adder = new FA(PP_tree.get(col).get(0), PP_tree.get(col).get(1), PP_tree.get(col).get(2), S, Cout);
 	    n_adder++;
 
@@ -110,7 +110,7 @@ public class Main {
 	    Adders.add(full_adder);
     }
 
-    private static void daddaReduction(int minReduction, int N_bits){
+    private static void daddaReduction(int minReduction){
     	//System.out.println("Altura desejada: " + minReduction);
     	ArrayList<Signal> column = new ArrayList<>();  // pick a specific partial product column
         int col;  // index a specific column in PP_tree
@@ -118,8 +118,8 @@ public class Main {
 	for (col = 2; col < PP_tree.size(); col ++){
 	    column = PP_tree.get(col);
 	    while(column.size() > minReduction){
-		if(column.size() > minReduction + 1) addFullAdder(col, N_bits);
-		else addHalfAdder(col, N_bits);
+		if(column.size() > minReduction + 1) addFullAdder(col);
+		else addHalfAdder(col);
 	    }
 	}
     }
@@ -133,7 +133,7 @@ public class Main {
         while(ReductionRatio * Height < MaxSize) Height = (int) Math.floor(Height * ReductionRatio);
 	System.out.println("SPARDE");
         while(MaxSize > 2) {
-	daddaReduction(Height, N_bits);
+	daddaReduction(Height);
 	    // update MaxSize and Dadda Height
 	    MaxSize = getTreeSize();
 	    System.out.println("SIZE: " + MaxSize);
@@ -142,8 +142,8 @@ public class Main {
 	System.out.println(":DDDDD");
         // column 0 only has one partial product
         // column 1 will be left with S[0], the output of a half adder
-        Signal S = new Signal("S", NA, NA, N_bits);
-        Signal Cout = new Signal("Cout", NA, NA, N_bits);
+        Signal S = new Signal("S", NA, NA);
+        Signal Cout = new Signal("Cout", NA, NA);
 	HA half_adder = new HA(PP_tree.get(1).get(0), PP_tree.get(1).get(1), S, Cout);
 
 	    n_adder++;
@@ -159,9 +159,9 @@ public class Main {
 
         for (int col = 2; col < PP_tree.size(); col ++){
 	    if(PP_tree.get(col).size() == 2){
-		addHalfAdder(col, N_bits);
+		addHalfAdder(col);
 	    }else if(PP_tree.get(col).size() == 3){
-		addFullAdder(col, N_bits);
+		addFullAdder(col);
 	    }
         }
     }
@@ -197,7 +197,7 @@ public class Main {
 	    writer.write("\ncomponent mbe_ppg is\ngeneric(n : natural := 32);\nport(three_digits : in std_logic_vector(2 downto 0);--sign bit representation\na : in std_logic_vector(N-1 downto 0);\npp : out std_logic_vector(N downto 0));\nend component;");
 	    
 	    // writer.write("\n\ntype p_t is array (N-1 downto 0) of std_logic_vector(N - 1 downto 0);");
-	    writer.write("\n\ntype p_t is array (N/2 downto 0) of std_logic_vector(N downto 0);");
+	    writer.write("\n\ntype p_t is array (N downto 0) of std_logic_vector(N downto 0);");
 	    writer.write("\nsignal p : p_t;");
 	    writer.write("\nsubtype s_t is std_logic_vector(" + n_adder + " downto 0);");
 	    writer.write("\nsignal S : s_t;");
@@ -211,9 +211,11 @@ public class Main {
             //     }
             // }
 	    writer.write("\nppg0_three_digits <= x(1 downto 0)&'0';");
-	    writer.write("\nppg0: mbe_ppg port map(ppg0_three_digits, y, P(0));\nF0: for i in 1 to n/2-1 generate\nppgi: mbe_ppg port map(x(2*i + 1 downto 2*i - 1), y, P(i));\nend generate;");
+	    writer.write("\nppg0: mbe_ppg port map(ppg0_three_digits, y, P(0));");
+	    writer.write("\nF0: for i in 1 to n/2-1 generate");
+	    writer.write("\nppgi: mbe_ppg port map(x(2*i + 1 downto 2*i - 1), y, P(2*i));\nend generate;");
 	    writer.write("\nppglast_three_digits <= \"00\"&x(n - 1);");
-	    writer.write("\nppglast: mbe_ppg port map(ppglast_three_digits, y, P(n/2));");
+	    writer.write("\nppglast: mbe_ppg port map(ppglast_three_digits, y, P(n));");
 	    
             int HAcnt = 1;
             int FAcnt = 1;
