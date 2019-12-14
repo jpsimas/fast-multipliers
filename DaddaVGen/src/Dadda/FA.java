@@ -32,7 +32,7 @@ public class FA {
     }
 
     public String toString(){
-        return "(" + a.toString() + ", " + b.toString() + ", " + Cin.toString() + ", " + S.toString() + ", " + Cout.toString() + ")";
+	return "(" + a.toString() + ", " + b.toString() + ", " + Cin.toString() + ", " + S.toString() + ", " + Cout.toString() + ")";
     }
 
 }

@@ -32,8 +32,11 @@ public class Main {
 
     public static void main(String[] args){
         String N_str = args[0];
+	System.out.println("NI");
         setDaddaAdders(N_str);
+	System.out.println("NI");
         genVerilog(Integer.parseInt(N_str));
+	System.out.println("NI");
     }
 
     // @brief - set all partial product columns (tree configuration)
@@ -43,9 +46,9 @@ public class Main {
         for (int i = 0; i < N_bits; i++) {
             ArrayList<Signal> column = new ArrayList<>();
             // j represents the counter in each column
-            for (int j = 0; j <= i; j++) {
-                Signal P = new Signal("P", i - j, j);
-                column.add(j, P);
+	    for (int j = 0; j <= i; j++) {
+		Signal P = new Signal("P", i - j, j, N_bits);
+		    column.add(j, P);
             }
             columns.put(i, column);
         }
@@ -54,8 +57,8 @@ public class Main {
             // j represents the counter in each column
             int cnt = 0;
             for (int j = i - N_bits + 1; j < N_bits; j++) {
-                Signal P = new Signal("P", i - j, j);
-                column.add(cnt, P);
+		Signal P = new Signal("P", i - j, j, N_bits);
+		    column.add(cnt, P);
                 cnt++;
             }
             columns.put(i, column);
@@ -68,53 +71,57 @@ public class Main {
     private static int getTreeSize(){
     	int MaxTreeSize = PP_tree.get(0).size();
     	for(int i = 1; i < PP_tree.size();  i ++){
-    		if (MaxTreeSize < PP_tree.get(i).size()) MaxTreeSize = PP_tree.get(i).size();
+	         if (MaxTreeSize < PP_tree.get(i).size()) MaxTreeSize = PP_tree.get(i).size();
     	}
     	return MaxTreeSize;
 
     }
 
-    private static void addHalfAdder(int col){
-    	Signal S = new Signal("S", n_adder, NA);
-        Signal Cout = new Signal("Cout", n_adder, NA);
-        HA half_adder = new HA(PP_tree.get(col).get(0), PP_tree.get(col).get(1), S, Cout);
-		n_adder++;
-		PP_tree.get(col).remove(0);
-		PP_tree.get(col).remove(0);
-		PP_tree.get(col).add(S);
-		PP_tree.get(col + 1).add(Cout);
-		// @lgaia - debug
-		//System.out.println("HA " + half_adder.toString() + ";");
-        Adders.add(half_adder);
+    private static void addHalfAdder(int col, int N_bits){
+    	Signal S = new Signal("S", n_adder, NA, N_bits);
+        Signal Cout = new Signal("Cout", n_adder, NA, N_bits);
+	HA half_adder = new HA(PP_tree.get(col).get(0), PP_tree.get(col).get(1), S, Cout);
+	n_adder++;
+
+	PP_tree.get(col).remove(0);
+	PP_tree.get(col).remove(0);
+	    PP_tree.get(col).add(S);
+	    PP_tree.get(col + 1).add(Cout);
+		
+	    // @lgaia - debug
+	    //System.out.println("HA " + half_adder.toString() + ";");
+	    Adders.add(half_adder);
     }
 
-    private static void addFullAdder(int col){
-    	Signal S = new Signal("S", n_adder, NA);
-        Signal Cout = new Signal("Cout", n_adder, NA);
-        FA full_adder = new FA(PP_tree.get(col).get(0), PP_tree.get(col).get(1), PP_tree.get(col).get(2), S, Cout);
-		n_adder++;
-		PP_tree.get(col).remove(0);
-		PP_tree.get(col).remove(0);
-		PP_tree.get(col).remove(0);
-		PP_tree.get(col).add(S);
-		PP_tree.get(col + 1).add(Cout);
-		// @lgaia - debug
-		//System.out.println("FA " + full_adder.toString() + ";");
-        Adders.add(full_adder);
+    private static void addFullAdder(int col, int N_bits){
+    	Signal S = new Signal("S", n_adder, NA, N_bits);
+        Signal Cout = new Signal("Cout", n_adder, NA, N_bits);
+	FA full_adder = new FA(PP_tree.get(col).get(0), PP_tree.get(col).get(1), PP_tree.get(col).get(2), S, Cout);
+	    n_adder++;
+
+	PP_tree.get(col).remove(0);
+	PP_tree.get(col).remove(0);
+	PP_tree.get(col).remove(0);
+	    PP_tree.get(col).add(S);
+	    PP_tree.get(col + 1).add(Cout);
+		
+	    // @lgaia - debug
+	    //System.out.println("FA " + full_adder.toString() + ";");
+	    Adders.add(full_adder);
     }
 
-    private static void daddaReduction(int minReduction){
+    private static void daddaReduction(int minReduction, int N_bits){
     	//System.out.println("Altura desejada: " + minReduction);
     	ArrayList<Signal> column = new ArrayList<>();  // pick a specific partial product column
         int col;  // index a specific column in PP_tree
 
-		for (col = 2; col < PP_tree.size(); col ++){
-			column = PP_tree.get(col);
-			while(column.size() > minReduction){
-				if(column.size() > minReduction + 1) addFullAdder(col);
-				else addHalfAdder(col);
-			}
-		}
+	for (col = 2; col < PP_tree.size(); col ++){
+	    column = PP_tree.get(col);
+	    while(column.size() > minReduction){
+		if(column.size() > minReduction + 1) addFullAdder(col, N_bits);
+		else addHalfAdder(col, N_bits);
+	    }
+	}
     }
 
     private static void setDaddaAdders(String N_str){
@@ -122,32 +129,40 @@ public class Main {
         PP_tree = setColumns(N_bits);  // all partial product columns
         int MaxSize = getTreeSize(); // Maximum column size
         int Height = 2;
+	System.out.println("SPURDO");
         while(ReductionRatio * Height < MaxSize) Height = (int) Math.floor(Height * ReductionRatio);
+	System.out.println("SPARDE");
         while(MaxSize > 2) {
-        	daddaReduction(Height);
-        	// update MaxSize and Dadda Height
-        	MaxSize = getTreeSize();
-        	Height = (int) Math.ceil(Height / ReductionRatio);
-        }
+	daddaReduction(Height, N_bits);
+	    // update MaxSize and Dadda Height
+	    MaxSize = getTreeSize();
+	    System.out.println("SIZE: " + MaxSize);
+	    Height = (int) Math.ceil(Height / ReductionRatio);
+	}
+	System.out.println(":DDDDD");
         // column 0 only has one partial product
         // column 1 will be left with S[0], the output of a half adder
-        Signal S = new Signal("S", NA, NA);
-        Signal Cout = new Signal("Cout", NA, NA);
+        Signal S = new Signal("S", NA, NA, N_bits);
+        Signal Cout = new Signal("Cout", NA, NA, N_bits);
 	HA half_adder = new HA(PP_tree.get(1).get(0), PP_tree.get(1).get(1), S, Cout);
+
+	    n_adder++;
+
 	PP_tree.get(1).remove(0);
 	PP_tree.get(1).remove(0);
-	PP_tree.get(1).add(S);
-	PP_tree.get(2).add(Cout);
+	    PP_tree.get(1).add(S);
+	    PP_tree.get(2).add(Cout);
+
 	// @lgaia - debug
 	//System.out.println("HA " + half_adder.toString() + ";");
-        Adders.add(half_adder);
+	    Adders.add(half_adder);
 
         for (int col = 2; col < PP_tree.size(); col ++){
-        	if(PP_tree.get(col).size() == 2){
-        		addHalfAdder(col);
-        	}else if(PP_tree.get(col).size() == 3){
-        		addFullAdder(col);
-        	}
+	    if(PP_tree.get(col).size() == 2){
+		addHalfAdder(col, N_bits);
+	    }else if(PP_tree.get(col).size() == 3){
+		addFullAdder(col, N_bits);
+	    }
         }
     }
 
@@ -178,32 +193,38 @@ public class Main {
 	    writer.write("\ncomponent full_adder is\nport(\na : in std_logic;\nb : in std_logic;\ncin : in  std_logic;\ns : out std_logic;\ncout : out std_logic);\nend component;");
 
 	    writer.write("\ncomponent half_adder is\nport(\na : in std_logic;\nb : in std_logic;\ns : out std_logic;\ncout : out std_logic);\nend component;\n");
+
+	    writer.write("\ncomponent mbe_ppg is\ngeneric(n : natural := 32);\nport(three_digits : in std_logic_vector(2 downto 0);--sign bit representation\na : in std_logic_vector(N-1 downto 0);\npp : out std_logic_vector(N downto 0));\nend component;");
 	    
 	    // writer.write("\n\ntype p_t is array (N-1 downto 0) of std_logic_vector(N - 1 downto 0);");
-	    writer.write("\n\ntype p_t is array (N/2-1 downto 0) of std_logic_vector(N downto 0);");
+	    writer.write("\n\ntype p_t is array (N/2 downto 0) of std_logic_vector(N downto 0);");
 	    writer.write("\nsignal p : p_t;");
 	    writer.write("\nsubtype s_t is std_logic_vector(" + n_adder + " downto 0);");
 	    writer.write("\nsignal S : s_t;");
 	    writer.write("\nsubtype cout_t is std_logic_vector(" + n_adder + " downto 0);");
 	    writer.write("\nsignal Cout : cout_t;");
+	    writer.write("\nsignal ppg0_three_digits, ppglast_three_digits : std_logic_vector(2 downto 0);");
 	    writer.write("\nbegin");
             // for (int i = 0; i < N_bits; i++) {
             //     for (int j = 0; j < N_bits; j++) {
 	    // 	    writer.write("\nP(" + i + ")(" + j + ") <= x(" + i + ") and y(" + j + ");");
             //     }
             // }
-	    writer.write("\nppg0: mbe_ppg port map(x(1 downto 0)&'0', y, P(0));\nfor i in 1 to n/2 generate\nppgi: mbe_ppg port map(x(2*i + 1 downto 2*i - 1), y, P(i));\nend generate;");
-
+	    writer.write("\nppg0_three_digits <= x(1 downto 0)&'0';");
+	    writer.write("\nppg0: mbe_ppg port map(ppg0_three_digits, y, P(0));\nF0: for i in 1 to n/2-1 generate\nppgi: mbe_ppg port map(x(2*i + 1 downto 2*i - 1), y, P(i));\nend generate;");
+	    writer.write("\nppglast_three_digits <= \"00\"&x(n - 1);");
+	    writer.write("\nppglast: mbe_ppg port map(ppglast_three_digits, y, P(n/2));");
+	    
             int HAcnt = 1;
             int FAcnt = 1;
             for (Object adder: Adders) {
                 if (adder.getClass().toString().equals("class Dadda.HA")){
-                    writer.write("\nHA" + HAcnt + " : half_adder port map" + adder.toString() + ";");
-                    HAcnt++;
+		    writer.write("\nHA" + HAcnt + " : half_adder port map" + adder.toString() + ";");
+		    HAcnt++;
                 }
                 else if (adder.getClass().toString().equals("class Dadda.FA")) {
-                    writer.write("\nFA" + FAcnt + " : full_adder port map" + adder.toString() + ";");
-                    FAcnt++;
+		    writer.write("\nFA" + FAcnt + " : full_adder port map" + adder.toString() + ";");
+		    FAcnt++;
                 }
             }
 

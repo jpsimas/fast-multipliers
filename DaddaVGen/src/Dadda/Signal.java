@@ -21,17 +21,25 @@ public class Signal {
     private String type;
     private int x_i;
     private int y_i;
+    public boolean is_valid;
 
-    public Signal(String type, int x_i, int y_i){
+    public Signal(String type, int x_i, int y_i, int N_bits){
         this.type = type;
         this.x_i = x_i;
         this.y_i = y_i;
+	if(y_i < N_bits/2)
+	    is_valid = true;
+	else
+	    is_valid = false;
     }
 
     public String toString(){
         String Str = "";
         if (type.equals("P")) {
-            Str = "P" + "(" + y_i + ")" + "(" + x_i + ")";
+	    if(is_valid)
+		Str = "P" + "(" + y_i + ")" + "(" + x_i + ")";
+	    else
+		Str = "'0'";
         }
         if (type.equals("S")) {
             Str = "S" + "(" + x_i + ")";

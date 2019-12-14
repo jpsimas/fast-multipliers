@@ -5,6 +5,7 @@ default:
 	ghdl -a mbe_ppg.vhd
 	ghdl -a tb.vhd
 	ghdl -e tb
+	./tb --vcd=out.vcd
 clean:
 	rm -rf *.o
 	rm -rf work-obj93.cf

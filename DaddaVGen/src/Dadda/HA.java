@@ -30,7 +30,7 @@ public class HA {
     }
 
     public String toString(){
-        return "(" + a.toString() + ", " + b.toString() + ", " + S.toString() + ", " + Cout.toString() + ")";
+	return "(" + a.toString() + ", " + b.toString() + ", " + S.toString() + ", " + Cout.toString() + ")";
     }
 
 }
