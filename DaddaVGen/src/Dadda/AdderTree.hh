@@ -14,7 +14,7 @@ class AdderTree {
 protected:
   std::vector<std::shared_ptr<Adder>> Adders;
   // Dadda heights: 2, 3, 4, 6, 9, 13, 19, 28, 42, 63
-  int n_adder = 1; //total number of adders
+  int n_adder = 0; //total number of adders
   static constexpr int NA = 0;
   std::map<int, std::vector<std::shared_ptr<Signal>>> PP_tree;
 

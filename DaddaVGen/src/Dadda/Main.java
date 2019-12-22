@@ -33,9 +33,10 @@ public class Main {
     public static void main(String[] args){
         String N_str = args[0];
 	System.out.println("NI");
-        setDaddaAdders(N_str);
+	int N_bits = Integer.parseInt(N_str);
+        setDaddaAdders(N_bits + 1);
 	System.out.println("NI");
-        genVerilog(Integer.parseInt(N_str));
+        genVerilog(N_bits);
 	System.out.println("NI");
     }
 
@@ -124,8 +125,7 @@ public class Main {
 	}
     }
 
-    private static void setDaddaAdders(String N_str){
-        int N_bits = Integer.parseInt(N_str);  // number of bits
+    private static void setDaddaAdders(int N_bits){
         PP_tree = setColumns(N_bits);  // all partial product columns
         int MaxSize = getTreeSize(); // Maximum column size
         int Height = 2;
@@ -194,11 +194,12 @@ public class Main {
 
 	    writer.write("\ncomponent half_adder is\nport(\na : in std_logic;\nb : in std_logic;\ns : out std_logic;\ncout : out std_logic);\nend component;\n");
 
-	    writer.write("\ncomponent mbe_ppg is\ngeneric(n : natural := 32);\nport(three_digits : in std_logic_vector(2 downto 0);--sign bit representation\na : in std_logic_vector(N-1 downto 0);\npp : out std_logic_vector(N downto 0));\nend component;");
+	    writer.write("\ncomponent mbe_ppg is\ngeneric(n : natural := 32);\nport(three_digits : in std_logic_vector(2 downto 0);--sign bit representation\na : in std_logic_vector(N-1 downto 0);\npp : out std_logic_vector(N downto 0);\nneg : out std_logic);\nend component;");
 	    
 	    // writer.write("\n\ntype p_t is array (N-1 downto 0) of std_logic_vector(N - 1 downto 0);");
 	    writer.write("\n\ntype p_t is array (N downto 0) of std_logic_vector(N downto 0);");
 	    writer.write("\nsignal p : p_t;");
+	    writer.write("\nsignal neg : std_logic_vector(N/2 downto 0);");
 	    writer.write("\nsubtype s_t is std_logic_vector(" + n_adder + " downto 0);");
 	    writer.write("\nsignal S : s_t;");
 	    writer.write("\nsubtype cout_t is std_logic_vector(" + n_adder + " downto 0);");
@@ -211,11 +212,11 @@ public class Main {
             //     }
             // }
 	    writer.write("\nppg0_three_digits <= x(1 downto 0)&'0';");
-	    writer.write("\nppg0: mbe_ppg port map(ppg0_three_digits, y, P(0));");
+	    writer.write("\nppg0: mbe_ppg port map(ppg0_three_digits, y, P(0), neg(0));");
 	    writer.write("\nF0: for i in 1 to n/2-1 generate");
-	    writer.write("\nppgi: mbe_ppg port map(x(2*i + 1 downto 2*i - 1), y, P(2*i));\nend generate;");
+	    writer.write("\nppgi: mbe_ppg port map(x(2*i + 1 downto 2*i - 1), y, P(2*i), neg(i));\nend generate;");
 	    writer.write("\nppglast_three_digits <= \"00\"&x(n - 1);");
-	    writer.write("\nppglast: mbe_ppg port map(ppglast_three_digits, y, P(n));");
+	    writer.write("\nppglast: mbe_ppg port map(ppglast_three_digits, y, P(n), neg(n/2));");
 	    
             int HAcnt = 1;
             int FAcnt = 1;
@@ -232,13 +233,28 @@ public class Main {
 
             // output assignments
             writer.write("\n\nz(" + (2*N_bits-1) + ") <= Cout(" + (n_adder-1) + ");");
-            int t = 1;
+            int t = 1 + 2;
             for (int i = (2*N_bits-2); i > 1; i--) {
                 writer.write("\nz(" + i + ") <= S(" + (n_adder-t) + ");");
                 t++;
             }
             writer.write("\nz(1) <= S(0);");
             writer.write("\nz(0) <= P(0)(0);");
+
+	    int p = 1;
+	    for(int i = 0; i <= N_bits; i ++) {
+		for(int j = 2*i + N_bits + 1; j < 2*N_bits; j++) {
+		    while(j - p > N_bits){
+			p += 2;
+			// for(int k = 0; k < j - p; k++)
+			//     writer.write("\nP(" + p + ")(" + k + ") <= '0';");
+		    }
+		    writer.write("\nP(" + p + ")(" + (j - p) + ") <= neg(" + i + ");");
+		}
+
+		// for(int k = 0; k < N_bits + 1 - p; k++)
+		//     writer.write("\nP(" + p + ")(" + k + ") <= '0';");
+	    }
 
             writer.write("\n\nend architecture;");
 

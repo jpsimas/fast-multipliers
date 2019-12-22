@@ -27,10 +27,11 @@ public class Signal {
         this.type = type;
         this.x_i = x_i;
         this.y_i = y_i;
-	if(y_i%2 == 0)
-	    is_valid = true;
-	else
-	    is_valid = false;
+	// if(y_i%2 == 0)
+	//     is_valid = true;
+	// else
+	//     is_valid = false;
+	is_valid = true;
     }
 
     public String toString(){
