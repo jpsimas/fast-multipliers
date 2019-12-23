@@ -152,7 +152,6 @@ void AdderTree::setDaddaAdders(size_t N_bits){
     height = ceil(height / ReductionRatio);
   }
     
-  std::cout << ":DDDDD" << std::endl;
   /*  
   // column 0 only has one partial product
   // column 1 will be left with S[0], the output of a half adder
