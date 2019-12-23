@@ -45,7 +45,7 @@ std::map<int, std::vector<std::shared_ptr<Signal>>> AdderTree::setColumns(size_t
     columns[i] = column;
   }
 
-  columns[N_bits + 1].push_back(std::make_shared<Signal>(Signal::signal_type::one, NA, NA));
+  columns[N_bits + 1].insert(columns[N_bits + 1].begin(), std::make_shared<Signal>(Signal::signal_type::one, NA, NA));
 
   //  columns[2*N_bits-1] = std::vector<std::shared_ptr<Signal>>();
   return columns;
