@@ -21,7 +21,7 @@ std::map<int, std::vector<std::shared_ptr<Signal>>> AdderTree::setColumns(size_t
       
     columns[i] = column;
   }
-  for(size_t i = N_bits + 1; i <= 2*N_bits-1; i++) {
+  for(size_t i = N_bits + 1; i <= 2*N_bits/*-1*/; i++) {
     std::vector<std::shared_ptr<Signal>> column;
     // j represents the counter in each column
     // int cnt = 0;
@@ -45,7 +45,9 @@ std::map<int, std::vector<std::shared_ptr<Signal>>> AdderTree::setColumns(size_t
     columns[i] = column;
   }
 
-  columns[2*N_bits-1] = std::vector<std::shared_ptr<Signal>>();
+  columns[N_bits + 1].push_back(std::make_shared<Signal>(Signal::signal_type::one, NA, NA));
+
+  //  columns[2*N_bits-1] = std::vector<std::shared_ptr<Signal>>();
   return columns;
 }
 
@@ -115,7 +117,7 @@ void AdderTree::daddaReduction(size_t minReduction){
   //System.out.println("Altura desejada: " + minReduction);
   // std::vector<Signal> column;  // pick a specific partial product column
   
-  for(size_t col = 2; col < PP_tree.size(); col ++){
+  for(size_t col = 0/*2*/; col < PP_tree.size(); col ++){
     auto column = PP_tree.find(col)->second;
     int n_loop = 0;
     while(column.size() > minReduction){
@@ -149,7 +151,7 @@ void AdderTree::setDaddaAdders(size_t N_bits){
   }
     
   std::cout << ":DDDDD" << std::endl;
-    
+  /*  
   // column 0 only has one partial product
   // column 1 will be left with S[0], the output of a half adder
   // auto S = std::make_shared<Signal>(Signal::signal_type::S, NA, NA);
@@ -165,11 +167,11 @@ void AdderTree::setDaddaAdders(size_t N_bits){
 
   std::shared_ptr<HA> half_adder;
   if(it->second.size() == 1) {
-    auto one = std::make_shared<Signal>(Signal::signal_type::one, NA, NA);
-    half_adder = std::make_shared<HA>(it->second.at(0), one, S, Cout);
-      n_adder++;
-      it->second.erase(it->second.begin());
-      it->second.push_back(S);
+    auto zero = std::make_shared<Signal>(Signal::signal_type::zero, NA, NA);
+    half_adder = std::make_shared<HA>(it->second.at(0), zero, S, Cout);
+    n_adder++;
+    it->second.erase(it->second.begin());
+    it->second.push_back(S);
   } else {
     half_adder = std::make_shared<HA>(it->second.at(0), it->second.at(1), S, Cout);
     n_adder++;
@@ -188,13 +190,15 @@ void AdderTree::setDaddaAdders(size_t N_bits){
   //System.out.println("HA " + half_adder.toString() + ";");
   Adders.push_back(half_adder);
 
-  for(size_t col = 2; col < PP_tree.size(); col ++){
+  */
+  for(size_t col = 0/*2*/; col < PP_tree.size(); col ++){
     if(PP_tree.find(col)->second.size() == 2){
       addHalfAdder(col);
     }else if(PP_tree.find(col)->second.size() == 3){
       addFullAdder(col);
     }
   }
+
 }
 
 void AdderTree::genVerilog(size_t N_bits){
@@ -257,21 +261,34 @@ void AdderTree::genVerilog(size_t N_bits){
     }
   }
 
-  // output assignmens
-  file << "\n\nz(" + std::to_string(2*N_bits-1) + ") <= Cout(" + std::to_string(n_adder-1) + ");";
-  int t = 1;
-  for(size_t i = (2*N_bits-2); i > 1; i--){
-    file << "\nz(" + std::to_string(i) + ") <= S(" + std::to_string(n_adder-t) + ");";
-    t++;
-  }
-  file << "\nz(1) <= S(0);";
-  file << "\nz(0) <= P(0)(0);";
-
   file << "\nF1: for i in 0 to neg'length-1 generate\nn_neg(i) <= not neg(i);\nend generate;";
 
-  file << "\n\nend architecture;";
+  // output assignments
+  // file << "\n\nz(" + std::to_string(2*N_bits-1) + ") <= Cout(" + std::to_string(n_adder-1) + ");";
+  // int t = 1;
+  // for(size_t i = (2*N_bits-2); i > 1; i--){
+  //   file << "\nz(" + std::to_string(i) + ") <= S(" + std::to_string(n_adder-t) + ");";
+  //   t++;
+  // }
+  // file << "\nz(1) <= S(0);";
+  // file << "\nz(0) <= P(0)(0);";
+  for(size_t i = 0; i <= 2*N_bits - 1; i++){
+    auto it = PP_tree.find(i);
+    if(it != PP_tree.end()){
+      file << "\nz(" << i << ") <= " << it->second.at(0)->toString() << ";";
+    }
+  }
 
+  file << "\n\nend architecture;";
+  
   file.close();
+
+  for(size_t i = 0; i < PP_tree.size(); i++) {
+    auto it = PP_tree.find(i);
+    if(it != PP_tree.end()) {
+      std::cout << "col: " << i << " size:" << it->second.size() << std::endl;
+    }
+  }
 
   //generate testbench
 

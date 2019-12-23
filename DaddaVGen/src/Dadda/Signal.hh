@@ -21,7 +21,7 @@
 
 class Signal {
 public:
-  enum signal_type {P, S, Cout, Cin, neg, nNeg, one};
+  enum signal_type {P, S, Cout, Cin, neg, nNeg, one, zero};
 private:
   signal_type type;
   int x_i;
@@ -30,7 +30,7 @@ public:
 
 
   Signal(signal_type type, int x_i, int y_i) : type(type), x_i(x_i), y_i(y_i) {
-    if(type != P && type != S && type != Cout && type != Cin && type != neg && type != nNeg && type != one)
+    if(type != P && type != S && type != Cout && type != Cin && type != neg && type != nNeg && type != one && type != zero)
       throw std::runtime_error("Tried to create signal with invalid signal type.");
   }
 
@@ -53,6 +53,8 @@ public:
       return std::string("n_neg(") + std::to_string(x_i) + ")";
     case one:
       return std::string("\'1\'");
+    case zero:
+      return std::string("\'0\'");
     default:
       throw std::runtime_error("Tried to call toString() on signal with invalid signal type.");
     }
