@@ -24,8 +24,6 @@ std::map<int, std::vector<std::shared_ptr<Signal>>> AdderTree::setColumns(size_t
     // j represents the counter in each column
     auto it = column.begin();
     for(size_t j = 0; j <= i/2; j++) {
-      // Signal P("P", i - j, j);
-      // column->add(j, P);
       it = column.insert(it, std::make_shared<Signal>(Signal::signal_type::P, j, i - 2*j));
       it++;
     }
@@ -40,7 +38,6 @@ std::map<int, std::vector<std::shared_ptr<Signal>>> AdderTree::setColumns(size_t
   for(size_t i = N_bits + 1; i <= 2*N_bits/*-1*/; i++) {
     std::vector<std::shared_ptr<Signal>> column;
     // j represents the counter in each column
-    // int cnt = 0;
 
     auto it = column.begin();
     if((i - N_bits - 1)%2 == 0) {
@@ -52,9 +49,6 @@ std::map<int, std::vector<std::shared_ptr<Signal>>> AdderTree::setColumns(size_t
     }
     
     for(size_t j = (i - N_bits + 1)/2; j <= N_bits/2; j++) {
-      // Signal P("P", i - j, j);
-      // column->add(cnt, P);
-      // cnt++;
       it = column.insert(it, std::make_shared<Signal>(Signal::signal_type::P, j, i - 2*j));
       it++;
     }
@@ -81,7 +75,7 @@ void AdderTree::addHalfAdder(int col){
   auto Cout = std::make_shared<Signal>(Signal::signal_type::Cout, n_adder, NA);
   auto it = PP_tree.find(col);
   if(it == PP_tree.end())
-    throw std::runtime_error("WAKE ME UP (HA)");
+    throw std::runtime_error("AdderTree::addHalfAdder: invalid column number.");
   auto half_adder = std::make_shared<HA>(it->second.at(0), it->second.at(1), S, Cout);
   n_adder++;
 
@@ -91,14 +85,11 @@ void AdderTree::addHalfAdder(int col){
 
   it = PP_tree.find(col + 1);
   if(it == PP_tree.end()) {
-    // throw std::runtime_error("WAKE ME UP INSIDE (HA)");
     PP_tree[col + 1] = std::vector<std::shared_ptr<Signal>>();
     PP_tree[col + 1].push_back(Cout);
   } else
     it->second.push_back(Cout);
 		
-  // @lgaia - debug
-  //System.out.println("HA " + half_adder.toString() + ";");
   Adders.push_back(half_adder);
 }
 
@@ -107,7 +98,7 @@ void AdderTree::addFullAdder(int col){
   auto Cout = std::make_shared<Signal>(Signal::signal_type::Cout, n_adder, NA);
   auto it = PP_tree.find(col);
   if(it == PP_tree.end())
-    throw std::runtime_error("WAKE ME UP (FA)");
+    throw std::runtime_error("AdderTree::addFullAdder: invalid column number.");
   auto full_adder = std::make_shared<FA>(it->second.at(0), it->second.at(1), it->second.at(2), S, Cout);
   n_adder++;
   
@@ -124,15 +115,10 @@ void AdderTree::addFullAdder(int col){
   } else
     it->second.push_back(Cout);
 		
-  // @lgaia - debug
-  //System.out.println("FA " + full_adder.toString() + ";");
   Adders.push_back(full_adder);
 }
 
 void AdderTree::daddaReduction(size_t minReduction){
-  //System.out.println("Altura desejada: " + minReduction);
-  // std::vector<Signal> column;  // pick a specific partial product column
-  
   for(size_t col = 0/*2*/; col < PP_tree.size(); col ++){
     auto column = PP_tree.find(col)->second;
     int n_loop = 0;
@@ -145,7 +131,7 @@ void AdderTree::daddaReduction(size_t minReduction){
       n_loop++;
       
       if(n_loop > 1000000)
-	throw std::runtime_error("too many loops. column.size() = " + std::to_string(column.size()) + ". minReduction = " + std::to_string(minReduction));
+	throw std::runtime_error("AdderTree::daddaReduction: too many loops. column.size() = " + std::to_string(column.size()) + ". minReduction = " + std::to_string(minReduction));
     }
   }
 };
