@@ -245,7 +245,9 @@ void AdderTree::genVerilog(size_t N_bits){
   file << "\nppg0: mbe_ppg generic map(N) port map(ppg0_three_digits, y, P(0), neg(0));";
   file << "\nF0: for i in 1 to n/2-1 generate";
   file << "\nppgi: mbe_ppg generic map(N) port map(x(2*i + 1 downto 2*i - 1), y, P(i), neg(i));\nend generate;";
-  file << "\nppglast_three_digits <= \"00\"&x(n - 1);";
+  // file << "\nppglast_three_digits <= \"00\"&x(n - 1);";
+  file << "\nppglast_three_digits(n - 2*(n/2) downto 0) <= x(n - 1 downto 2*(n/2) -1);";
+  file << "ppglast_three_digits(2 downto n - 2*(n/2) + 1) <= (others => '0');";
   file << "\nppglast: mbe_ppg generic map(N) port map(ppglast_three_digits, y, P(n/2), neg(n/2));";
  
   int HAcnt = 1;
