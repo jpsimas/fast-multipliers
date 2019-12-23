@@ -26,7 +26,7 @@ public:
   void addFullAdder(int col);
   void daddaReduction(size_t minReduction);
   void setDaddaAdders(size_t N_bits);
-  // write Verilog code line by line
-  void genVerilog(size_t N_bits);
+  // write VHDL code line by line
+  void genVHDL(size_t N_bits);
 };
 #endif

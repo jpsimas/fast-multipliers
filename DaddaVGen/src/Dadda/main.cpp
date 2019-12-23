@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
    
   tree.setDaddaAdders(N_bits);
    
-  tree.genVerilog(N_bits);
+  tree.genVHDL(N_bits);
    
   return 0;
 }

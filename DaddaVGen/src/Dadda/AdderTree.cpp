@@ -201,7 +201,7 @@ void AdderTree::setDaddaAdders(size_t N_bits){
 
 }
 
-void AdderTree::genVerilog(size_t N_bits){
+void AdderTree::genVHDL(size_t N_bits){
   std::ofstream file;
   file.open("vhdl/Mult_Dadda" + std::to_string(N_bits) + ".vhd", std::ofstream::out);
   
