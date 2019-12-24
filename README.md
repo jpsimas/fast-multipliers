@@ -1,2 +1,2 @@
 # fast-multipliers-vhdl
-fork of https://github.com/HSOgawa/fast-multipliers that generates vhdl code instead of verilog. see original rep for for info
+Generator for unsigned n-bit modified Booth encoding Dadda tree multiplier code in VHDL written in C++. Based on https://github.com/HSOgawa/fast-multipliers/ and using a modified version of the algorithm described in L. G. d. Castro, H. S. Ogawa and B. d. C. Albertini, "Automated Generation of HDL Implementations of Dadda and Wallace Tree Multipliers," 2017 VII Brazilian Symposium on Computing Systems Engineering (SBESC), Curitiba, 2017, pp. 17-22.
